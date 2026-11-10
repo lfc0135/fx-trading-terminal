@@ -1,0 +1,128 @@
+import type { Instrument } from "./types";
+
+export const INSTRUMENTS: Record<string, Instrument> = {
+  EURUSD: {
+    symbol: "EURUSD",
+    name: "Euro / US dollar",
+    base: "EUR",
+    quote: "USD",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.2,
+    yahooSymbol: "EURUSD=X",
+    yahooProxy: false,
+    searchTerms: ["EURUSD", "EUR/USD"],
+    annualVol: 0.08,
+    anchor: 1.1168,
+  },
+  GBPUSD: {
+    symbol: "GBPUSD",
+    name: "Sterling / US dollar",
+    base: "GBP",
+    quote: "USD",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.4,
+    yahooSymbol: "GBPUSD=X",
+    yahooProxy: false,
+    searchTerms: ["GBPUSD", "GBP/USD"],
+    annualVol: 0.09,
+    anchor: 1.3343,
+  },
+  USDJPY: {
+    symbol: "USDJPY",
+    name: "US dollar / yen",
+    base: "USD",
+    quote: "JPY",
+    pip: 0.01,
+    decimals: 3,
+    spreadPips: 1.3,
+    yahooSymbol: "USDJPY=X",
+    yahooProxy: false,
+    searchTerms: ["USDJPY", "USD/JPY"],
+    annualVol: 0.1,
+    anchor: 158.8,
+  },
+  AUDUSD: {
+    symbol: "AUDUSD",
+    name: "Australian dollar / US dollar",
+    base: "AUD",
+    quote: "USD",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.4,
+    yahooSymbol: "AUDUSD=X",
+    yahooProxy: false,
+    searchTerms: ["AUDUSD", "AUD/USD"],
+    annualVol: 0.11,
+    anchor: 0.6863,
+  },
+  USDCAD: {
+    symbol: "USDCAD",
+    name: "US dollar / Canadian dollar",
+    base: "USD",
+    quote: "CAD",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.6,
+    yahooSymbol: "USDCAD=X",
+    yahooProxy: false,
+    searchTerms: ["USDCAD", "USD/CAD"],
+    annualVol: 0.08,
+    anchor: 1.4184,
+  },
+  USDCHF: {
+    symbol: "USDCHF",
+    name: "US dollar / Swiss franc",
+    base: "USD",
+    quote: "CHF",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.5,
+    yahooSymbol: "USDCHF=X",
+    yahooProxy: false,
+    searchTerms: ["USDCHF", "USD/CHF"],
+    annualVol: 0.08,
+    anchor: 0.8253,
+  },
+  NZDUSD: {
+    symbol: "NZDUSD",
+    name: "New Zealand dollar / US dollar",
+    base: "NZD",
+    quote: "USD",
+    pip: 0.0001,
+    decimals: 5,
+    spreadPips: 1.8,
+    yahooSymbol: "NZDUSD=X",
+    yahooProxy: false,
+    searchTerms: ["NZDUSD", "NZD/USD"],
+    annualVol: 0.12,
+    anchor: 0.56,
+  },
+  XAUUSD: {
+    symbol: "XAUUSD",
+    name: "Gold / US dollar",
+    base: "XAU",
+    quote: "USD",
+    pip: 0.01,
+    decimals: 2,
+    spreadPips: 35,
+    yahooSymbol: "GC=F",
+    yahooProxy: true,
+    searchTerms: ["XAUUSD", "GOLD"],
+    annualVol: 0.16,
+    anchor: 4036,
+  },
+};
+
+export const UNIVERSE = Object.keys(INSTRUMENTS);
+
+export function instrument(symbol: string): Instrument | null {
+  return INSTRUMENTS[symbol.toUpperCase()] ?? null;
+}
+
+export function mustInstrument(symbol: string): Instrument {
+  const found = instrument(symbol);
+  if (!found) throw new Error(`Unknown instrument ${symbol}`);
+  return found;
+}
