@@ -1,3 +1,4 @@
+import { orderLeverage } from "./leverage";
 import type { Side } from "./types";
 
 export const ETORO_ORIGIN = "https://public-api.etoro.com";
@@ -77,7 +78,7 @@ export type OpenOrderBody = {
   transaction: "buy" | "sellShort";
   instrumentId: number;
   orderType: "mkt" | "mit";
-  leverage: 1;
+  leverage: number;
   units: number;
   triggerRate?: number;
   stopLossRate?: number;
@@ -85,12 +86,14 @@ export type OpenOrderBody = {
   stopLossType?: "fixed";
 };
 
-/** eToro leverage is fixed at 1 until the desk is explicitly allowed to raise it. */
+/** Leverage on the wire is min(requested, cap), and the cap cannot exceed 2. */
 export function buildOpenOrder(input: {
   instrumentId: number;
   side: Side;
   orderType: "market" | "limit";
   units: number;
+  leverageCap: number;
+  leverage?: number;
   limitPrice?: number | null;
   stopLoss?: number | null;
   takeProfit?: number | null;
@@ -100,7 +103,7 @@ export function buildOpenOrder(input: {
     transaction: input.side === "long" ? "buy" : "sellShort",
     instrumentId: input.instrumentId,
     orderType: input.orderType === "market" ? "mkt" : "mit",
-    leverage: 1,
+    leverage: orderLeverage(input.leverage, input.leverageCap),
     units: input.units,
   };
   if (input.orderType === "limit" && input.limitPrice != null) body.triggerRate = input.limitPrice;

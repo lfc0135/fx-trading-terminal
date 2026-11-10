@@ -148,7 +148,7 @@ export function DeskApp() {
             </Badge>
           </div>
           <h1 className="mt-1 text-2xl font-medium tracking-tight">Paper desk for Aayush</h1>
-          <p className="text-sm text-muted-foreground">Asia/Dubai · spot majors and gold · 1:1 until the config says otherwise</p>
+          <p className="text-sm text-muted-foreground">Asia/Dubai · spot majors and gold · leverage cap {snapshot.route.leverageCap.toFixed(0)}×</p>
         </div>
         <div className="text-right">
           <div className="num text-lg">{clock || snapshot.dubaiLabel}</div>

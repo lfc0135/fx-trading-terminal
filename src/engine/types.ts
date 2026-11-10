@@ -33,7 +33,7 @@ export type RiskConfig = {
   dailyLossKillPct: number;
   /** Fraction of peak equity. */
   maxDrawdownKillPct: number;
-  /** Gross exposure cap as a multiple of equity. 1 means no leverage. */
+  /** Gross exposure cap as a multiple of equity. 2 is the approved ceiling. */
   leverageCap: number;
   minStopPips: number;
 };

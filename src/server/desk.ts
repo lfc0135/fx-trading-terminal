@@ -99,6 +99,7 @@ function brokerFor(state: FileState): EtoroBroker {
     apiKey: config.apiKey,
     userKey: config.userKey,
     instrumentIds: state.instrumentIds,
+    leverageCap: config.leverageCap,
   });
 }
 

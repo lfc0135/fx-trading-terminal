@@ -87,9 +87,10 @@ export function SettingsPanel({
       <section className="space-y-3 rounded-lg border bg-card p-4">
         <h2 className="text-base font-medium">Risk limits</h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          These are enforced on the server before a paper fill or an eToro order. Leverage stays at{" "}
-          <span className="num">{snapshot.route.leverageCap.toFixed(0)}×</span> from <span className="num">LEVERAGE_CAP</span>.
-          Orders sent to eToro always use leverage 1.
+          These are enforced on the server before a paper fill or an eToro order. The exposure cap is{" "}
+          <span className="num">{snapshot.route.leverageCap.toFixed(0)}×</span> equity, from <span className="num">LEVERAGE_CAP</span>,
+          and it cannot be set above 2×. Paper sizing and eToro order payloads both use that number. The stop, the 0.5%
+          per-trade risk budget, and both kill switches are unchanged.
         </p>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Per-trade risk %" value={risk} onChange={setRisk} />

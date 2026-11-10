@@ -11,6 +11,7 @@ import {
   type EtoroMode,
   type EtoroPortfolioView,
 } from "@/engine/etoro";
+import { LEVERAGE_HARD_CEILING, orderLeverage } from "@/engine/leverage";
 
 function detail(body: unknown, fallback: string): string {
   if (body && typeof body === "object") {
@@ -48,6 +49,7 @@ export class EtoroBroker implements BrokerAdapter {
       apiKey: string;
       userKey: string;
       instrumentIds: Record<string, number>;
+      leverageCap: number;
     },
   ) {
     this.displayName = opts.mode === "real" ? "eToro real" : "eToro demo";
@@ -105,22 +107,25 @@ export class EtoroBroker implements BrokerAdapter {
   async placeOrder(request: BrokerOrderRequest): Promise<BrokerFill> {
     try {
       const instrumentId = request.instrumentId ?? (await this.resolveInstrumentId(request.symbol));
+      const leverage = orderLeverage(this.opts.leverageCap, this.opts.leverageCap);
       const body = buildOpenOrder({
         instrumentId,
         side: request.side,
         orderType: request.type,
         units: request.units,
+        leverageCap: this.opts.leverageCap,
+        leverage,
         limitPrice: request.limitPrice,
         stopLoss: request.stopLoss,
         takeProfit: request.takeProfit,
       });
-      if (body.leverage !== 1) {
+      if (body.leverage < 1 || body.leverage > LEVERAGE_HARD_CEILING) {
         return {
           broker: this.id,
           orderId: null,
           positionId: null,
           status: "rejected",
-          message: "Refusing to send leverage other than 1.",
+          message: `Refusing to send leverage ${body.leverage}. The ceiling is ${LEVERAGE_HARD_CEILING}.`,
         };
       }
       const response = await this.call(etoroPaths(this.opts.mode).orders, "POST", body);

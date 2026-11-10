@@ -165,6 +165,26 @@ describe("risk engine", () => {
     expect(decision.riskUsd).toBeLessThanOrEqual(50_000 * 0.2 + 0.05);
   });
 
+  it("sizes up to twice equity when the leverage cap is 2", () => {
+    const decision = planOrder(
+      context({ config: config({ perTradeRiskPct: 0.5, leverageCap: 2, maxPositionNotionalPct: 1 }) }),
+      {
+        side: "long",
+        units: null,
+        sizeFromRisk: true,
+        mid: 1.1,
+        stopLoss: 1.095,
+        takeProfit: 1.12,
+        now: tuesday(),
+        instrument: eur,
+      },
+    );
+    expect(decision.allowed).toBe(true);
+    expect(decision.notionalUsd).toBeGreaterThan(50_000);
+    expect(decision.notionalUsd).toBeLessThanOrEqual(100_000 + 0.05);
+    expect(decision.marginUsd).toBeLessThanOrEqual(50_000 + 0.05);
+  });
+
   it("rejects a new order when gross exposure is already above the leverage cap", () => {
     const decision = planOrder(
       context({

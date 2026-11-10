@@ -24,7 +24,7 @@ With no environment variables the desk:
 - simulates market and limit fills, including spread and the weekend close
 - refuses new risk when the daily-loss or drawdown kill switch is on
 
-`npm test` covers the risk engine, the paper fill model, the backtester (including the daily target hit rate), and the eToro request layer (auth headers, leverage fixed at 1, 429 backoff, demo versus real paths).
+`npm test` covers the risk engine, the paper fill model, the backtester (including the daily target hit rate), and the eToro request layer (auth headers, leverage = min(requested, cap ≤ 2), 429 backoff, demo versus real paths).
 
 ## eToro keys
 
@@ -79,7 +79,7 @@ Every request sends `x-api-key`, `x-user-key`, and a fresh `x-request-id` UUID. 
 | Open order | `POST /api/v2/trading/execution/demo/orders` | `POST /api/v2/trading/execution/orders` |
 | Close | `POST /api/v1/trading/execution/demo/market-close-orders/positions/{id}` | `POST /api/v1/trading/execution/market-close-orders/positions/{id}` |
 
-Real routes follow the published API. Portfolio does not use a `/real/` segment. Execution drops `demo` rather than inserting `real`. FX pairs are resolved to an eToro `instrumentId` through `GET /api/v1/market-data/search` and cached in `data/desk.json`. Every open order sends `leverage: 1`. Shorts use `sellShort`. Limits use `orderType: "mit"` and `triggerRate`.
+Real routes follow the published API. Portfolio does not use a `/real/` segment. Execution drops `demo` rather than inserting `real`. FX pairs are resolved to an eToro `instrumentId` through `GET /api/v1/market-data/search` and cached in `data/desk.json`. Every open order sends `leverage` equal to `min(requested, LEVERAGE_CAP)`, and that value is never above 2. The default cap is 2, so a default order sends `leverage: 2`. Shorts use `sellShort`. Limits use `orderType: "mit"` and `triggerRate`.
 
 Another broker implements `BrokerAdapter` in `src/engine/broker.ts`. eToro is the only remote adapter shipped here.
 
@@ -88,9 +88,9 @@ Another broker implements `BrokerAdapter` in `src/engine/broker.ts`. eToro is th
 | Control | Default |
 | --- | --- |
 | Starting cash | $50,000 (`PAPER_STARTING_BALANCE`) |
-| Leverage cap | 1 (`LEVERAGE_CAP`, and eToro payloads stay at 1) |
+| Leverage cap | 2 (`LEVERAGE_CAP`). Hard ceiling 2. Margin is notional / leverage. |
 | Per-trade risk | 0.5% of equity, sized from the stop |
-| Max position | 100% of equity in one name |
+| Max position | 100% of buying power in one name (notional up to equity × leverage) |
 | Daily loss kill | 2% from the Dubai-day open, blocks new risk until the next Dubai day |
 | Max drawdown kill | 10% from peak, stays on until you reset it |
 | Stop | Required, at least 5 pips, on the correct side of the fill |
@@ -123,5 +123,5 @@ The Backtest tab runs the momentum sample on a recorded EURUSD path as soon as y
 - The daily kill switch uses the Dubai calendar day, not the broker’s rollover.
 - On eToro, a HTTP 200 means the order was accepted, not that it filled. Confirm on the next portfolio read.
 - v2 create-order currently opens positions (`buy` / `sellShort`). Closes use the v1 close-by-units route.
-- Raising `LEVERAGE_CAP` changes the local exposure cap only. The eToro body still sends leverage 1.
+- `LEVERAGE_CAP` defaults to 2 and is clamped to 2. Paper exposure, margin, the backtester, and the eToro `leverage` field all use that same number.
 - Nothing here is advice, and the sample strategies are not sized to manufacture a 2% day.

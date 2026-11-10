@@ -133,7 +133,7 @@ export function planOrder(ctx: RiskContext, input: PlanInput): RiskDecision {
   );
 
   if (stop != null && stopOk && fill > 0 && ctx.equity > 0) {
-    const maxName = ctx.equity * ctx.config.maxPositionNotionalPct;
+    const maxName = ctx.equity * ctx.config.maxPositionNotionalPct * ctx.config.leverageCap;
     const room = ctx.equity * ctx.config.leverageCap - ctx.openNotionalUsd;
     const cashRoom = ctx.cash * ctx.config.leverageCap;
     const notionalRoom = Math.max(0, Math.min(maxName, room, cashRoom));
@@ -175,7 +175,7 @@ export function planOrder(ctx: RiskContext, input: PlanInput): RiskDecision {
   if (units > 0 && !input.sizeFromRisk && riskUsd > riskBudgetUsd + 0.02) {
     reasons.push("Per-trade risk exceeds the budget");
   }
-  if (units > 0 && notional > ctx.equity * ctx.config.maxPositionNotionalPct + 0.02) {
+  if (units > 0 && notional > ctx.equity * ctx.config.maxPositionNotionalPct * ctx.config.leverageCap + 0.02) {
     reasons.push("Position notional exceeds the per-name cap");
   }
   if (

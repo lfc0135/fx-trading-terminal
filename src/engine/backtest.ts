@@ -234,7 +234,7 @@ export function runBacktest(opts: {
   const grossWin = wins.reduce((sum, trade) => sum + trade.pnlUsd, 0);
   const grossLoss = Math.abs(losses.reduce((sum, trade) => sum + trade.pnlUsd, 0));
   const lowPct = report.lowHitRate == null ? "n/a" : `${(report.lowHitRate * 100).toFixed(1)}%`;
-  const note = `The 2% daily band was hit on ${report.daysAtOrAboveLow} of ${report.days} Dubai sessions (${lowPct}). The 3% line was hit on ${report.daysAtOrAboveHigh}. This is the measured rate for this sample, not a forecast. At 1:1 leverage a 2% day needs a large favorable move relative to the cash actually deployed.`;
+  const note = `The 2% daily band was hit on ${report.daysAtOrAboveLow} of ${report.days} Dubai sessions (${lowPct}). The 3% line was hit on ${report.daysAtOrAboveHigh}. This is the measured rate for this sample, not a forecast. At ${opts.config.leverageCap}:1 a 2% day still needs a large favorable move relative to the cash actually deployed.`;
 
   return {
     symbol: opts.symbol,

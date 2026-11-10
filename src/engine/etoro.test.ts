@@ -9,6 +9,7 @@ import {
   parsePortfolio,
   searchQuery,
 } from "./etoro";
+import { clampLeverageCap, orderLeverage } from "./leverage";
 
 function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), {
@@ -33,17 +34,28 @@ describe("eToro adapter", () => {
     expect(searchQuery("EURUSD")).toContain("internalSymbolFull=EURUSD");
   });
 
-  it("always sends leverage 1 and uses sellShort for shorts", () => {
+  it("sends leverage = min(requested, cap ≤ 2) and uses sellShort for shorts", () => {
+    expect(orderLeverage(2, 2)).toBe(2);
+    expect(orderLeverage(5, 2)).toBe(2);
+    expect(orderLeverage(2, 1)).toBe(1);
+    expect(orderLeverage(1, 2)).toBe(1);
+    expect(orderLeverage(9, 9)).toBe(2);
+    expect(clampLeverageCap(2)).toBe(2);
+    expect(clampLeverageCap(1)).toBe(1);
+    expect(clampLeverageCap(30)).toBe(2);
+    expect(clampLeverageCap(Number.NaN)).toBe(2);
     const order = buildOpenOrder({
       instrumentId: 101,
       side: "short",
       orderType: "limit",
       units: 2500,
+      leverageCap: 2,
+      leverage: 5,
       limitPrice: 1.105,
       stopLoss: 1.112,
       takeProfit: 1.09,
     });
-    expect(order.leverage).toBe(1);
+    expect(order.leverage).toBe(2);
     expect(order.transaction).toBe("sellShort");
     expect(order.orderType).toBe("mit");
     expect(order.triggerRate).toBe(1.105);
